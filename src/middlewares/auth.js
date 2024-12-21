@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 
 export const authMiddleware = async (req, res, next) => {
-  const token = req.header('Authorization')
+  const token = req.header('Authorization').split(" ")[1]
 
   if (!token) return res.status(401).send('Access Denied 🙅')
 
@@ -11,7 +11,6 @@ export const authMiddleware = async (req, res, next) => {
     req.user = await User.findById(verified.id)
     next()
   } catch (err) {
-
     return res.status(400).send('Invalid Token')
   }
 }
