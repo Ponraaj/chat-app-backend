@@ -1,11 +1,11 @@
-import express from "express";
-import { followUser, unfollowUser, getUserProfile } from "../controllers/userController.js";
-import { authMiddleware } from "../middlewares/auth.js";
+import express from 'express';
+import { followUser, unfollowUser, getUserProfile } from '../controllers/userController.js';
+import { auth } from '../middlewares/auth.js';
 
-const router = express.Router()
+const router = express.Router();
 
-router.put('/follow/:userId', authMiddleware, followUser)
-router.put('/unfollow/:userId', authMiddleware, unfollowUser)
-router.get('/profile/:userId', authMiddleware, getUserProfile)
+router.put('/follow/:userId', auth, followUser);
+router.put('/unfollow/:userId', auth, unfollowUser);
+router.get('/profile/:userId', auth, getUserProfile);
 
-export default router
+export default router;
