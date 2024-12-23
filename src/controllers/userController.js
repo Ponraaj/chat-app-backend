@@ -59,7 +59,6 @@ const unfollowUser = async (req, res) => {
 const getUserProfile = async (req, res) => {
 	try {
 		const userId = req.session.passport.user;
-		console.log('Logged in User: ', userId);
 
 		const user = await User.findById(userId)
 			// .populate('posts')

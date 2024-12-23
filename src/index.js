@@ -12,6 +12,7 @@ import initPassport from './config/passport.js';
 import http from 'http';
 import MongoStore from 'connect-mongo';
 import cookieParser from 'cookie-parser';
+import Message from './models/Message.js';
 
 dotenv.config();
 connectToDB();
@@ -74,7 +75,7 @@ io.use((socket, next) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
-app.use('api/messages', messageRouter);
+app.use('/api/messages', messageRouter);
 
 io.on('connection', (socket) => {
 	const user = socket.request.user;
@@ -82,12 +83,36 @@ io.on('connection', (socket) => {
 
 	socket.on('setup', (userData) => {
 		socket.join(userData._id);
+		console.log(`User ${userData._id} joined their room`);
 		socket.emit('connected');
+	});
+
+	socket.on('sendMessage', async (data) => {
+		console.log('Message received:', data);
+
+		const { senderId, receiverId, message } = data;
+
+		try {
+			const newMessage = new Message({
+				senderId,
+				receiverId,
+				text: message,
+				timestamp: new Date(),
+			});
+			await newMessage.save();
+
+			// Emit to both sender and receiver rooms
+			io.to(receiverId).to(senderId).emit('receiveMessage', newMessage);
+		} catch (error) {
+			console.error('Error handling message:', error);
+		}
 	});
 
 	socket.on('disconnect', () => {
 		console.log(`Socket ${socket.id} disconnected`);
-		socket.leave(user._id);
+		if (user?._id) {
+			socket.leave(user._id);
+		}
 	});
 });
 

@@ -4,7 +4,7 @@ import User from '../models/User.js';
 // Send a new message
 export const sendMessage = async (req, res) => {
 	const { receiverId, text, image } = req.body;
-	const senderId = req.user._id;
+	const senderId = req.session.passport.user;
 
 	try {
 		const receiver = await User.findById(receiverId);
@@ -32,7 +32,14 @@ export const sendMessage = async (req, res) => {
 
 export const getMessages = async (req, res) => {
 	const { userId } = req.params;
+
 	const loggedInUserId = req.session.passport.user;
+	if (!userId) {
+		return res.status(400).json({ message: 'User ID is required' });
+	}
+	if (!loggedInUserId) {
+		return res.status(401).json({ message: 'Unauthorized: Please log in' });
+	}
 
 	try {
 		const messages = await Message.find({
