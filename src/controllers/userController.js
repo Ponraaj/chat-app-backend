@@ -58,6 +58,26 @@ const unfollowUser = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
 	try {
+		const userId = req.session.passport.user;
+		console.log('Logged in User: ', userId);
+
+		const user = await User.findById(userId)
+			// .populate('posts')
+			.populate('followers')
+			.populate('following');
+
+		if (!user) {
+			return res.status(404).json({ message: 'User not found 🔴' });
+		}
+
+		res.status(200).json(user);
+	} catch (error) {
+		res.status(500).json({ message: 'Error retrieving profile 🔴', error: error.message });
+	}
+};
+
+const getReceiverProfile = async (req, res) => {
+	try {
 		const { userId } = req.params;
 
 		const user = await User.findById(userId)
@@ -75,4 +95,4 @@ const getUserProfile = async (req, res) => {
 	}
 };
 
-export { followUser, unfollowUser, getUserProfile };
+export { followUser, unfollowUser, getUserProfile, getReceiverProfile };
